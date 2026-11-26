@@ -1,0 +1,8 @@
+# 复制本文件为 src/main/resources/jdbc.local.properties 后填写本机口令。
+# jdbc.local.properties 已写入 .gitignore，不要提交。
+# SpringConfig 会优先加载它；文件不存在时仍使用 jdbc.properties 里的占位密码。
+
+jdbc.driver=com.mysql.cj.jdbc.Driver
+jdbc.url=jdbc:mysql://127.0.0.1:3306/ssm_emp?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&characterEncoding=utf8
+jdbc.username=root
+jdbc.password=your_password
