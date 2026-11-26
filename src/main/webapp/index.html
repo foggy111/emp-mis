@@ -12,8 +12,9 @@
 </head>
 <body>
     <h1>EMP 员工管理 MIS</h1>
-    <p>这是经典 SSM 后端，员工接口如下。</p>
+    <p>这是经典 SSM 后端。除登录、注册和本页外，接口需要会话中的 <code>loginUser</code>。测试账号 <code>admin</code> / <code>123456</code>。</p>
     <ul>
+        <li><code>POST /login</code>、<code>POST /register</code></li>
         <li><code>POST /emps</code> 新增</li>
         <li><code>PUT /emps</code> 修改</li>
         <li><code>DELETE /emps/{id}</code> 删除</li>

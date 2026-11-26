@@ -5,8 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lab.emp.interceptor.LoginInterceptor;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.validation.Validator;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -18,13 +21,24 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 /**
- * Spring MVC 子容器。当前只扫描 controller。
- * 全局异常处理类位于 common 包，任务 6 会把该包纳入本容器，否则 {@code @RestControllerAdvice} 不会生效。
+ * Spring MVC 子容器。
+ * common 与 aspect 必须在这里扫描：@RestControllerAdvice 和 Controller 切面只在子容器中生效。
+ * 根容器的切面代理不到子容器里的 Controller。
  */
 @Configuration
 @EnableWebMvc
-@ComponentScan("com.lab.emp.controller")
+@EnableAspectJAutoProxy(proxyTargetClass = true)
+@ComponentScan(basePackages = {
+        "com.lab.emp.controller",
+        "com.lab.emp.common",
+        "com.lab.emp.aspect"
+})
 public class SpringMvcConfig implements WebMvcConfigurer {
+
+    @Override
+    public Validator getValidator() {
+        return new LocalValidatorFactoryBean();
+    }
 
     @Override
     public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {

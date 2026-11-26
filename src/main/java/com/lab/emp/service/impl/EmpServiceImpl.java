@@ -9,6 +9,7 @@ import com.lab.emp.mapper.EmpMapper;
 import com.lab.emp.service.EmpService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,5 +37,46 @@ public class EmpServiceImpl extends ServiceImpl<EmpMapper, Emp> implements EmpSe
             return empty;
         }
         return baseMapper.selectPage(new Page<Emp>(current, size), wrapper);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void saveWithTx(Emp emp) {
+        baseMapper.insert(emp);
+        triggerArithmeticException();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void saveWithSwallowedException(Emp emp) {
+        try {
+            baseMapper.insert(emp);
+            triggerArithmeticException();
+        } catch (ArithmeticException ex) {
+            // 异常没有抛出代理，事务管理器会提交而不是回滚
+        }
+    }
+
+    @Override
+    public void saveBySelfInvocation(Emp emp) {
+        this.saveWithTx(emp);
+    }
+
+    @Override
+    public void callPrivateSave(Emp emp) {
+        privateSave(emp);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    private void privateSave(Emp emp) {
+        baseMapper.insert(emp);
+        triggerArithmeticException();
+    }
+
+    private static void triggerArithmeticException() {
+        int value = 1 / 0;
+        if (value == 0) {
+            return;
+        }
     }
 }

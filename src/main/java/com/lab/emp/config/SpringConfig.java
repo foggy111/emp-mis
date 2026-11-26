@@ -17,8 +17,10 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 
 import javax.sql.DataSource;
 
@@ -31,7 +33,12 @@ import javax.sql.DataSource;
 @Configuration
 @ComponentScan(basePackages = "com.lab.emp",
         excludeFilters = {
+                // @RestController 带有 @Controller，一并排除
                 @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = Controller.class),
+                // @RestControllerAdvice 带有 @ControllerAdvice，必须留在 MVC 子容器
+                @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = ControllerAdvice.class),
+                // 请求日志切面要代理 Controller，只能注册在子容器
+                @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = Aspect.class),
                 // SpringMvcConfig 带 @EnableWebMvc，若被根容器扫到会在没有 ServletContext 时启动失败
                 @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SpringMvcConfig.class)
         })

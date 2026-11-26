@@ -6,6 +6,7 @@ import com.lab.emp.dto.EmpQueryDTO;
 import com.lab.emp.entity.Emp;
 import com.lab.emp.service.EmpService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -30,7 +32,10 @@ public class EmpController {
 
     /** 新增员工。主键由数据库自增，忽略调用方传入的 empId。 */
     @PostMapping
-    public Result<Void> add(@RequestBody Emp emp) {
+    public Result<Void> add(@RequestBody @Valid Emp emp, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return Result.fail(firstError(bindingResult));
+        }
         emp.setEmpId(null);
         empService.save(emp);
         return Result.ok(null);
@@ -38,7 +43,10 @@ public class EmpController {
 
     /** 修改员工。 */
     @PutMapping
-    public Result<Void> update(@RequestBody Emp emp) {
+    public Result<Void> update(@RequestBody @Valid Emp emp, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return Result.fail(firstError(bindingResult));
+        }
         if (emp.getEmpId() == null) {
             return Result.fail("员工编号不能为空");
         }
@@ -85,5 +93,12 @@ public class EmpController {
                                   @RequestParam(defaultValue = "5") int size,
                                   EmpQueryDTO query) {
         return Result.ok(empService.pageQuery(page, size, query));
+    }
+
+    private String firstError(BindingResult bindingResult) {
+        if (bindingResult.getFieldError() != null && bindingResult.getFieldError().getDefaultMessage() != null) {
+            return bindingResult.getFieldError().getDefaultMessage();
+        }
+        return "参数校验失败";
     }
 }
