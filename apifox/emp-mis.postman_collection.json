@@ -1,0 +1,840 @@
+{
+  "info": {
+    "name": "emp-mis",
+    "description": "EMP 员工管理 MIS。导入 ApiFox 后把 baseUrl 设为 http://localhost:8080（应用上下文为 /）。先执行登录并保存 Cookie。",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 认证",
+      "item": [
+        {
+          "name": "注册",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/register",
+            "description": "重复执行时期望 code=500，消息为用户名已存在。",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\": \"student\", \"password\": \"123456\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "登录",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/login",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\": \"admin\", \"password\": \"123456\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "});",
+                  "pm.test('返回用户名', function () { pm.expect(pm.response.json().data).to.eql('admin'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "错误密码",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/login",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\": \"admin\", \"password\": \"000000\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(500);",
+                  "});",
+                  "pm.test('提示', function () {",
+                  "    pm.expect(json.message).to.eql(\"用户名或密码错误\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 员工正常功能",
+      "item": [
+        {
+          "name": "新增员工",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/emps",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"empName\": \"周洋\", \"gender\": \"男\", \"dept\": \"研发部\", \"deptId\": 1, \"post\": \"测试工程师\", \"salary\": 9000, \"hireDate\": \"2025-09-01\", \"status\": 1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "条件分页",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/emps?name=张&gender=男&dept=研发部&page=1&size=5",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "查询全部默认分页",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/emps",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "单条查询",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/emps/1",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "修改员工",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/emps",
+            "description": "会改动样例张伟的岗位，测完可重新执行 sql/init.sql。",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"empId\": 1, \"empName\": \"张伟\", \"gender\": \"男\", \"dept\": \"研发部\", \"deptId\": 1, \"post\": \"高级工程师\", \"salary\": 12000, \"hireDate\": \"2024-07-01\", \"status\": 1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "删除不存在的员工",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/emps/999998",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(500);",
+                  "});",
+                  "pm.test('提示', function () {",
+                  "    pm.expect(json.message).to.eql(\"员工不存在\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "批量删除不存在的编号",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/emps",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "[999998, 999999]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 参数校验",
+      "item": [
+        {
+          "name": "空姓名",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/emps",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"empName\": \"\", \"gender\": \"男\", \"dept\": \"研发部\", \"deptId\": 1, \"post\": \"测试工程师\", \"salary\": 9000, \"hireDate\": \"2025-09-01\", \"status\": 1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(500);",
+                  "});",
+                  "pm.test('提示', function () {",
+                  "    pm.expect(json.message).to.eql(\"员工姓名不能为空\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "负薪资",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/emps",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"empName\": \"测试\", \"gender\": \"男\", \"dept\": \"研发部\", \"deptId\": 1, \"post\": \"测试工程师\", \"salary\": -1, \"hireDate\": \"2025-09-01\", \"status\": 1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(500);",
+                  "});",
+                  "pm.test('提示', function () {",
+                  "    pm.expect(json.message).to.eql(\"薪资不能为负数\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "超长姓名",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/emps",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"empName\": \"名名名名名名名名名名名名名名名名名名名名名名名名名名名名名名名名名名名名名名名名名名名名名名名名名名名\", \"gender\": \"男\", \"dept\": \"研发部\", \"deptId\": 1, \"post\": \"测试工程师\", \"salary\": 9000, \"hireDate\": \"2025-09-01\", \"status\": 1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(500);",
+                  "});",
+                  "pm.test('提示', function () {",
+                  "    pm.expect(json.message).to.eql(\"姓名长度不能超过50\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "超长部门",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/emps",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"empName\": \"周洋\", \"gender\": \"男\", \"dept\": \"部部部部部部部部部部部部部部部部部部部部部部部部部部部部部部部部部部部部部部部部部部部部部部部部部部部\", \"deptId\": 1, \"post\": \"测试工程师\", \"salary\": 9000, \"hireDate\": \"2025-09-01\", \"status\": 1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(500);",
+                  "});",
+                  "pm.test('提示', function () {",
+                  "    pm.expect(json.message).to.eql(\"部门长度不能超过50\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "缺少薪资",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/emps",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"empName\": \"测试\", \"gender\": \"男\", \"dept\": \"研发部\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(500);",
+                  "});",
+                  "pm.test('提示', function () {",
+                  "    pm.expect(json.message).to.eql(\"薪资不能为空\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 异常场景",
+      "item": [
+        {
+          "name": "查询不存在的编号",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/emps/999999",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(500);",
+                  "});",
+                  "pm.test('提示', function () {",
+                  "    pm.expect(json.message).to.eql(\"员工不存在\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "删除不存在的编号",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/emps/999999",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(500);",
+                  "});",
+                  "pm.test('提示', function () {",
+                  "    pm.expect(json.message).to.eql(\"员工不存在\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "修改不存在的编号",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/emps",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"empId\": 999999, \"empName\": \"张伟\", \"gender\": \"男\", \"dept\": \"研发部\", \"deptId\": 1, \"post\": \"高级工程师\", \"salary\": 12000, \"hireDate\": \"2024-07-01\", \"status\": 1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(500);",
+                  "});",
+                  "pm.test('提示', function () {",
+                  "    pm.expect(json.message).to.eql(\"员工不存在\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "编号类型错误",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/emps/abc",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(500);",
+                  "});",
+                  "pm.test('提示', function () {",
+                  "    pm.expect(json.message).to.eql(\"参数类型错误\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "未登录",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/emps",
+            "description": "执行前清除 Cookie，否则会沿用登录会话。"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', function () { pm.response.to.have.status(401); });",
+                  "var json = pm.response.json();",
+                  "pm.test('未登录', function () {",
+                  "    pm.expect(json.code).to.eql(401);",
+                  "    pm.expect(json.message).to.eql('未登录');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "批量删除空数组",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/emps",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "[]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(500);",
+                  "});",
+                  "pm.test('提示', function () {",
+                  "    pm.expect(json.message).to.eql(\"待删除的员工编号不能为空\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 分页边界",
+      "item": [
+        {
+          "name": "第 0 页",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/emps?page=0&size=5",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "});",
+                  "pm.test('按第 1 页', function () { pm.expect(pm.response.json().data.current).to.eql(1); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "超过末页",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/emps?page=9999&size=5",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "});",
+                  "pm.test('记录为空', function () { pm.expect(pm.response.json().data.records.length).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "size 为 0",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/emps?page=1&size=0",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "});",
+                  "pm.test('不返回行', function () { pm.expect(pm.response.json().data.records.length).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "size 为负数",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/emps?page=1&size=-1",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.test('业务码', function () {",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "});",
+                  "pm.test('不返回行', function () { pm.expect(pm.response.json().data.records.length).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

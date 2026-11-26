@@ -1,0 +1,309 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "emp-mis",
+    "version": "1.0.0",
+    "description": "EMP 员工管理 MIS。经典 SSM，非 Spring Boot。边界用例的逐步断言见同目录 Postman 集合与测试记录。"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "tags": [
+    {
+      "name": "认证"
+    },
+    {
+      "name": "员工"
+    }
+  ],
+  "paths": {
+    "/login": {
+      "post": {
+        "tags": [
+          "认证"
+        ],
+        "summary": "登录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "code 200 或 500"
+          }
+        }
+      }
+    },
+    "/register": {
+      "post": {
+        "tags": [
+          "认证"
+        ],
+        "summary": "注册",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "code 200；用户名重复时 code 500"
+          }
+        }
+      }
+    },
+    "/emps": {
+      "get": {
+        "tags": [
+          "员工"
+        ],
+        "summary": "分页多条件查询",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "gender",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dept",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 5
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Page<Emp>，未登录为 401"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "员工"
+        ],
+        "summary": "新增员工",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Emp"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功 data 为 null；校验失败 code 500"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "员工"
+        ],
+        "summary": "修改员工",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Emp"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功或业务失败"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "员工"
+        ],
+        "summary": "批量删除",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "空数组时 code 500"
+          }
+        }
+      }
+    },
+    "/emps/{id}": {
+      "get": {
+        "tags": [
+          "员工"
+        ],
+        "summary": "查询一名员工",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "不存在时 code 500"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "员工"
+        ],
+        "summary": "删除一名员工",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "不存在时 code 500"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Login": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "Emp": {
+        "type": "object",
+        "required": [
+          "empName",
+          "salary"
+        ],
+        "properties": {
+          "empId": {
+            "type": "integer"
+          },
+          "empName": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "gender": {
+            "type": "string",
+            "maxLength": 1
+          },
+          "dept": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "deptId": {
+            "type": "integer"
+          },
+          "post": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "salary": {
+            "type": "number",
+            "minimum": 0
+          },
+          "hireDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "integer"
+          }
+        }
+      },
+      "Result": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "enum": [
+              200,
+              500,
+              401
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {}
+        }
+      }
+    }
+  }
+}
