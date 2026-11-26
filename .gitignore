@@ -1,0 +1,21 @@
+# Maven
+target/
+
+# IntelliJ IDEA
+*.iml
+.idea/
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# 本机数据库口令覆盖文件，禁止入库
+jdbc.local.properties
+
+# 日志与系统垃圾
+*.log
+.DS_Store
+Thumbs.db
+*~
+*.swp
