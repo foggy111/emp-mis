@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>emp-mis 员工管理</title>
+    <style>
+        body { font-family: "Segoe UI", "PingFang SC", sans-serif; margin: 2rem auto; max-width: 42rem; line-height: 1.6; color: #1f2933; }
+        code { background: #f4f6f8; padding: 0.1rem 0.35rem; }
+        h1 { font-size: 1.4rem; }
+    </style>
+</head>
+<body>
+    <h1>EMP 员工管理 MIS</h1>
+    <p>这是经典 SSM 后端，员工接口如下。</p>
+    <ul>
+        <li><code>POST /emps</code> 新增</li>
+        <li><code>PUT /emps</code> 修改</li>
+        <li><code>DELETE /emps/{id}</code> 删除</li>
+        <li><code>DELETE /emps</code> 批量删除，请求体为编号数组</li>
+        <li><code>GET /emps/{id}</code> 单条</li>
+        <li><code>GET /emps?name=&amp;gender=&amp;dept=&amp;page=1&amp;size=5</code> 分页条件查询</li>
+    </ul>
+    <p>请用 ApiFox 或同类工具调试。部署时把应用上下文设为 <code>/</code>，路径才与上面一致。</p>
+</body>
+</html>
